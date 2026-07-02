@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Panel de escucha · Don Fadrique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3F1E9;--card:#FAF8F1;--ink:#1E241C;--bottle:#243B2E;--bottle-deep:#16271D;
+    --brass:#A67C34;--brass-soft:#EBDFC5;--sage:#6E7A63;--line:#E1DCCB;--line-strong:#CFC9B4;--ok:#3E6B4A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-size:16px;line-height:1.5}
+  body{max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:88px}
+  ::selection{background:var(--brass-soft)}
+  header{padding:22px 20px 14px;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .crest{width:42px;height:42px;border:1.5px solid var(--brass);border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 42px}
+  .crest span{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:22px;color:var(--bottle);line-height:1}
+  .brand-txt{display:flex;flex-direction:column}
+  .brand-name{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:22px;letter-spacing:.3px;line-height:1}
+  .brand-sub{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:var(--sage);margin-top:4px}
+  nav.tabs{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;display:flex;background:var(--card);border-top:1px solid var(--line-strong);z-index:20}
+  nav.tabs button{flex:1;background:none;border:none;padding:11px 2px 13px;font-family:'Inter';font-size:10.5px;letter-spacing:.2px;color:var(--sage);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px}
+  nav.tabs button .dot{width:20px;height:3px;border-radius:2px;background:transparent;transition:.2s}
+  nav.tabs button.active{color:var(--bottle);font-weight:600}
+  nav.tabs button.active .dot{background:var(--brass)}
+  main{padding:18px 20px 20px}
+  section{display:none}
+  section.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  h2{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:26px;margin-bottom:4px;color:var(--bottle)}
+  .lead{font-size:13px;color:var(--sage);margin-bottom:16px;line-height:1.45}
+  label.fld{display:block;font-size:12px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;color:var(--sage);margin:14px 0 6px}
+  textarea,input[type=text],select{width:100%;font-family:'Inter';font-size:15px;color:var(--ink);background:var(--card);border:1px solid var(--line-strong);border-radius:10px;padding:11px 12px;resize:vertical}
+  textarea:focus,input:focus,select:focus{outline:none;border-color:var(--brass)}
+  textarea{min-height:96px;line-height:1.45}
+  .voices{display:flex;gap:8px;margin-top:2px}
+  .voice{flex:1;border:1.5px solid var(--line-strong);background:var(--card);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:.15s}
+  .voice .vn{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:16px}
+  .voice .vd{font-size:10px;color:var(--sage);margin-top:2px;line-height:1.25}
+  .voice[aria-pressed=true]{border-color:var(--bottle);background:#fff}
+  .voice[aria-pressed=true] .vn{color:var(--bottle)}
+  .voice.v-cocina[aria-pressed=true]{box-shadow:inset 0 -3px 0 var(--brass)}
+  .voice.v-sala[aria-pressed=true]{box-shadow:inset 0 -3px 0 var(--sage)}
+  .voice.v-casa[aria-pressed=true]{box-shadow:inset 0 -3px 0 var(--bottle)}
+  button.primary{width:100%;margin-top:18px;background:var(--bottle);color:#fff;border:none;border-radius:12px;padding:14px;font-family:'Inter';font-size:15px;font-weight:600;letter-spacing:.3px;cursor:pointer;transition:.15s}
+  button.primary:active{transform:scale(.99)}
+  button.primary:disabled{opacity:.55;cursor:default}
+  .hint{font-size:12px;color:var(--bottle-deep);background:var(--brass-soft);border-radius:10px;padding:10px 12px;margin-top:14px;line-height:1.45}
+  .hint b{color:var(--bottle)}
+  .sugs{margin-top:20px;display:flex;flex-direction:column;gap:12px}
+  .sug{background:var(--card);border:1px solid var(--line-strong);border-radius:14px;padding:14px 14px 12px}
+  .sug .txt{font-size:15px;line-height:1.5}
+  .sug .row{display:flex;gap:8px;margin-top:12px}
+  .sug .row button{flex:1;border:1px solid var(--line-strong);background:#fff;border-radius:9px;padding:9px;font-family:'Inter';font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
+  .sug .row button.cp{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .sug .row button.cp.done{background:var(--ok);border-color:var(--ok)}
+  .loading{margin-top:20px;text-align:center;color:var(--sage);font-size:13px}
+  .spinner{width:26px;height:26px;border:3px solid var(--line-strong);border-top-color:var(--bottle);border-radius:50%;margin:0 auto 10px;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .err{margin-top:16px;background:#F1E7DC;border:1px solid #D8BE95;color:#6A4A18;border-radius:10px;padding:11px 12px;font-size:13px;line-height:1.45}
+  .add-box{background:var(--card);border:1px solid var(--line-strong);border-radius:14px;padding:14px;margin-bottom:18px}
+  .add-grid{display:flex;gap:8px}
+  .add-grid select{flex:0 0 40%}
+  button.add{width:100%;margin-top:10px;background:var(--sage);color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:600;cursor:pointer}
+  .track-group{margin-bottom:20px}
+  .track-group h3{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--bottle);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .track-group h3 .count{font-family:'Inter';font-size:11px;font-weight:600;color:#fff;background:var(--brass);border-radius:20px;padding:1px 8px}
+  .item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:8px}
+  .item .pri{width:8px;height:8px;border-radius:50%;flex:0 0 8px}
+  .pri.alta{background:var(--bottle)} .pri.media{background:var(--brass)} .pri.baja{background:var(--sage)}
+  .item .nm{flex:1;font-size:14px;font-weight:500;word-break:break-word}
+  .item .nm small{display:block;font-weight:400;color:var(--sage);font-size:12px}
+  .item .del{background:none;border:none;color:var(--sage);font-size:20px;cursor:pointer;padding:0 4px;line-height:1}
+  .empty{text-align:center;color:var(--sage);font-size:13px;padding:26px 10px;line-height:1.5}
+  .log{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:10px}
+  .log .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .log .vtag{font-size:10px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;padding:2px 8px;border-radius:20px;background:var(--brass-soft);color:var(--bottle)}
+  .log .date{font-size:11px;color:var(--sage)}
+  .log .ctx{font-size:12px;color:var(--sage);font-style:italic;margin-bottom:4px}
+  .log .body{font-size:14px;line-height:1.45}
+  .news-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .news-head .upd{font-size:11px;color:var(--sage)}
+  .news-head button{background:none;border:1px solid var(--line-strong);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--bottle);cursor:pointer}
+  .news{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:10px;text-decoration:none;color:inherit}
+  .news .nt{font-size:14px;font-weight:500;line-height:1.35;margin-bottom:6px}
+  .news .nm{font-size:11px;color:var(--sage);display:flex;gap:8px}
+  .news .use{margin-top:9px;font-size:12px;font-weight:600;color:var(--bottle)}
+  .footnote{font-size:11px;color:var(--sage);text-align:center;margin-top:22px;line-height:1.5;padding:0 10px}
+  .cfg{background:#F3EBD9;border:1px solid #D8BE95;color:#6A4A18;border-radius:10px;padding:11px 12px;font-size:12.5px;line-height:1.5;margin-bottom:14px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="crest"><span>DF</span></div>
+    <div class="brand-txt">
+      <span class="brand-name">Don Fadrique</span>
+      <span class="brand-sub">Panel de escucha</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="tab-novedades" class="active">
+    <h2>Novedades</h2>
+    <p class="lead">Lo último que la prensa dice sobre vuestros temas. Se actualiza solo. Toca una noticia para leerla o comentarla.</p>
+    <div id="cfgWarn"></div>
+    <div class="news-head"><span class="upd" id="newsUpd">—</span><button id="newsReload">Actualizar</button></div>
+    <div id="newslist"></div>
+  </section>
+
+  <section id="tab-comentar">
+    <h2>Comentar un post</h2>
+    <p class="lead">Pega lo que ha publicado la cuenta, elige la voz de la casa y te propongo comentarios que aportan.</p>
+    <label class="fld">Voz</label>
+    <div class="voices">
+      <button class="voice v-cocina" data-voice="Cocina" aria-pressed="true"><div class="vn">Cocina</div><div class="vd">técnica · producto</div></button>
+      <button class="voice v-sala" data-voice="Sala" aria-pressed="false"><div class="vn">Sala</div><div class="vd">servicio · vino</div></button>
+      <button class="voice v-casa" data-voice="Don Fadrique" aria-pressed="false"><div class="vn">La casa</div><div class="vd">identidad · mesa</div></button>
+    </div>
+    <label class="fld" for="who">¿Quién ha publicado?</label>
+    <input type="text" id="who" placeholder="p. ej. crítico gastronómico, un comensal, otro restaurante…">
+    <label class="fld" for="post">El post (texto o de qué va)</label>
+    <textarea id="post" placeholder="Pega el texto del post o descríbelo…"></textarea>
+    <button class="primary" id="gen">Proponer comentarios</button>
+    <div class="hint"><b>Regla de oro:</b> antes de comentar, ¿aporta criterio o abre conversación? Si sí, comenta. Si no, dale like y pasa. Nunca pedir que reserven ni autopromoción en el post de otro.</div>
+    <div id="out"></div>
+  </section>
+
+  <section id="tab-seguimiento">
+    <h2>Seguimiento</h2>
+    <p class="lead">Las cuentas y temas que vigilas, por prioridad.</p>
+    <div class="add-box">
+      <label class="fld" style="margin-top:0">Añadir</label>
+      <input type="text" id="tname" placeholder="Nombre o @handle / tema">
+      <div class="add-grid" style="margin-top:8px">
+        <select id="tcat">
+          <option value="Críticos y periodistas">Crítico / periodista</option>
+          <option value="Guías y premios">Guía / premio</option>
+          <option value="Chefs y restaurantes">Chef / restaurante</option>
+          <option value="Prescriptores y comensales">Prescriptor / comensal</option>
+          <option value="Temas y etiquetas">Tema / etiqueta</option>
+          <option value="Medios">Medio</option>
+        </select>
+        <select id="tpri">
+          <option value="alta">Prioridad alta</option>
+          <option value="media">Prioridad media</option>
+          <option value="baja">Prioridad baja</option>
+        </select>
+      </div>
+      <button class="add" id="addBtn">Añadir a la lista</button>
+    </div>
+    <div id="tracklist"></div>
+  </section>
+
+  <section id="tab-registro">
+    <h2>Registro</h2>
+    <p class="lead">Lo que ya has guardado, para no repetirte.</p>
+    <div id="loglist"></div>
+    <p class="footnote">Los comentarios los publicas tú a mano en cada red. Esta herramienta te ayuda a decidir y redactar; no publica nada por su cuenta.</p>
+  </section>
+</main>
+
+<nav class="tabs">
+  <button data-tab="novedades" class="active"><span class="dot"></span>Novedades</button>
+  <button data-tab="comentar"><span class="dot"></span>Comentar</button>
+  <button data-tab="seguimiento"><span class="dot"></span>Seguir</button>
+  <button data-tab="registro"><span class="dot"></span>Registro</button>
+</nav>
+
+<script>
+/* ===================================================================
+   CONFIGURACIÓN — pega aquí la URL de tu backend de Easypanel.
+   =================================================================== */
+const BACKEND_URL = "";
+const APP_KEY = "df"; // esta app es Don Fadrique
+/* =================================================================== */
+
+const store = {
+  get(k){ try{ return JSON.parse(localStorage.getItem('df_'+k)); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem('df_'+k, JSON.stringify(v)); }catch(e){} }
+};
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+document.querySelectorAll('nav.tabs button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+    document.getElementById('tab-'+b.dataset.tab).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+if(!BACKEND_URL){
+  document.getElementById('cfgWarn').innerHTML =
+    '<div class="cfg">Aún no has conectado el servidor. Cuando pegues la URL del backend en el archivo (BACKEND_URL), aparecerán aquí las noticias y funcionará el generador de comentarios.</div>';
+}
+
+let voice='Cocina';
+document.querySelectorAll('.voice').forEach(v=>v.addEventListener('click',()=>{
+  document.querySelectorAll('.voice').forEach(x=>x.setAttribute('aria-pressed','false'));
+  v.setAttribute('aria-pressed','true'); voice=v.dataset.voice;
+}));
+const voiceBrief={
+  'Cocina':'La cocina de Don Fadrique (con Nicolás Sánchez Monje al frente). Habla de técnica y producto: brasa, puntos, temporada, cómo tratan el ibérico y el producto salmantino. Criterio de cocinero, curioso y generoso con colegas.',
+  'Sala':'La sala de Don Fadrique — hospitalidad y servicio. Habla de la experiencia en mesa, vino y maridaje, atención, el detalle. Cercana y cálida, con oficio de sala. Nunca pide reservas ni vende.',
+  'Don Fadrique':'El restaurante Don Fadrique como casa. Habla de su identidad y del territorio salmantino, su filosofía, su relación con el producto y con Cerdos & Rosas cuando venga a cuento de forma natural. Sobrio, nada publicitario.'
+};
+
+const out=document.getElementById('out');
+document.getElementById('gen').addEventListener('click',generate);
+async function generate(){
+  const post=document.getElementById('post').value.trim();
+  const who=document.getElementById('who').value.trim();
+  if(!post){ out.innerHTML='<div class="err">Escribe o pega primero de qué va el post.</div>'; return; }
+  if(!BACKEND_URL){ out.innerHTML='<div class="err">Falta conectar el servidor (BACKEND_URL). Mientras tanto, puedes pedir los comentarios directamente en tu chat de Claude.</div>'; return; }
+  const btn=document.getElementById('gen'); btn.disabled=true;
+  out.innerHTML='<div class="loading"><div class="spinner"></div>Preparando propuestas…</div>';
+  try{
+    const r=await fetch(BACKEND_URL.replace(/\/$/,'')+'/api/generate',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({voiceBrief:voiceBrief[voice],who,post})
+    });
+    const data=await r.json();
+    if(!data.suggestions) throw new Error(data.error||'sin propuestas');
+    renderSugs(data.suggestions,post,who);
+  }catch(e){ out.innerHTML='<div class="err">No he podido generar las propuestas. Revisa que el servidor esté activo.</div>'; }
+  finally{ btn.disabled=false; }
+}
+function renderSugs(arr,post,who){
+  const cv=voice;
+  out.innerHTML='<div class="sugs">'+arr.map((a,i)=>{
+    const c=esc(a.comentario||a.comment||'');
+    return `<div class="sug"><div class="txt" contenteditable="true" data-i="${i}">${c}</div>
+      <div class="row"><button class="cp" data-i="${i}">Copiar</button><button class="lg" data-i="${i}">Guardar en registro</button></div></div>`;
+  }).join('')+'</div>';
+  out.querySelectorAll('.cp').forEach(b=>b.addEventListener('click',async()=>{
+    const t=out.querySelector('.txt[data-i="'+b.dataset.i+'"]').innerText;
+    try{await navigator.clipboard.writeText(t);}catch(e){}
+    b.textContent='Copiado ✓';b.classList.add('done');setTimeout(()=>{b.textContent='Copiar';b.classList.remove('done');},1600);
+  }));
+  out.querySelectorAll('.lg').forEach(b=>b.addEventListener('click',()=>{
+    const t=out.querySelector('.txt[data-i="'+b.dataset.i+'"]').innerText;
+    addLog({voice:cv,ctx:(who?who+' — ':'')+post.slice(0,80),body:t,date:Date.now()});
+    b.textContent='Guardado ✓';setTimeout(()=>b.textContent='Guardar en registro',1600);
+  }));
+}
+
+const newslist=document.getElementById('newslist');
+document.getElementById('newsReload').addEventListener('click',loadNews);
+async function loadNews(){
+  if(!BACKEND_URL){ newslist.innerHTML='<div class="empty">Conecta el servidor para ver noticias.</div>'; return; }
+  newslist.innerHTML='<div class="loading"><div class="spinner"></div>Buscando novedades…</div>';
+  try{
+    const r=await fetch(BACKEND_URL.replace(/\/$/,'')+'/api/news?app='+APP_KEY);
+    const data=await r.json();
+    const upd=data.updatedAt?new Date(data.updatedAt).toLocaleString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+    document.getElementById('newsUpd').textContent='Actualizado: '+upd;
+    if(!data.items||!data.items.length){ newslist.innerHTML='<div class="empty">Sin noticias por ahora. Vuelve a intentarlo en un rato.</div>'; return; }
+    newslist.innerHTML=data.items.map(n=>{
+      const d=n.date?new Date(n.date).toLocaleDateString('es-ES',{day:'2-digit',month:'short'}):'';
+      return `<a class="news" href="${esc(n.link)}" target="_blank" rel="noopener">
+        <div class="nt">${esc(n.title)}</div>
+        <div class="nm"><span>${esc(n.source||'')}</span><span>${d}</span></div>
+        <div class="use">Abrir ↗</div></a>`;
+    }).join('');
+  }catch(e){ newslist.innerHTML='<div class="empty">No se pudieron cargar las noticias.</div>'; }
+}
+
+const catOrder=['Críticos y periodistas','Guías y premios','Medios','Chefs y restaurantes','Prescriptores y comensales','Temas y etiquetas'];
+let track=store.get('track');
+if(!track){ track=[
+  {name:'José Carlos Capel',cat:'Críticos y periodistas',pri:'alta'},
+  {name:'Guía Repsol',cat:'Guías y premios',pri:'alta'},
+  {name:'La Gaceta de Salamanca',cat:'Medios',pri:'alta'},
+  {name:'#SalamancaGastronómica',cat:'Temas y etiquetas',pri:'media'},
+  {name:'#cocinadebrasa',cat:'Temas y etiquetas',pri:'baja'}
+]; store.set('track',track); }
+function renderTrack(){
+  const box=document.getElementById('tracklist');
+  if(!track.length){ box.innerHTML='<div class="empty">Aún no sigues nada. Añade críticos, guías, chefs y temas arriba.</div>'; return; }
+  let html='';
+  catOrder.forEach(cat=>{
+    const items=track.filter(t=>t.cat===cat); if(!items.length) return;
+    html+=`<div class="track-group"><h3>${cat}<span class="count">${items.length}</span></h3>`;
+    items.forEach(it=>{ const idx=track.indexOf(it);
+      html+=`<div class="item"><span class="pri ${it.pri}"></span><span class="nm">${esc(it.name)}<small>prioridad ${it.pri}</small></span><button class="del" data-idx="${idx}">×</button></div>`;
+    }); html+='</div>';
+  });
+  box.innerHTML=html;
+  box.querySelectorAll('.del').forEach(b=>b.addEventListener('click',()=>{track.splice(+b.dataset.idx,1);store.set('track',track);renderTrack();}));
+}
+document.getElementById('addBtn').addEventListener('click',()=>{
+  const name=document.getElementById('tname').value.trim(); if(!name) return;
+  track.push({name,cat:document.getElementById('tcat').value,pri:document.getElementById('tpri').value});
+  store.set('track',track); document.getElementById('tname').value=''; renderTrack();
+});
+
+let log=store.get('log')||[];
+function addLog(e){ log.unshift(e); store.set('log',log); renderLog(); }
+function renderLog(){
+  const box=document.getElementById('loglist');
+  if(!log.length){ box.innerHTML='<div class="empty">Todavía no has guardado comentarios.</div>'; return; }
+  box.innerHTML=log.map((l,i)=>{
+    const d=new Date(l.date), ds=d.toLocaleDateString('es-ES',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="log"><div class="meta"><span class="vtag">${esc(l.voice)}</span><span class="date">${ds}</span></div><div class="ctx">${esc(l.ctx)}</div><div class="body">${esc(l.body)}</div><div class="row" style="display:flex;margin-top:10px"><button class="del-log" data-i="${i}" style="flex:1;border:1px solid var(--line-strong);background:#fff;border-radius:9px;padding:8px;font-size:12px;font-weight:600;color:var(--sage);cursor:pointer">Eliminar</button></div></div>`;
+  }).join('');
+  box.querySelectorAll('.del-log').forEach(b=>b.addEventListener('click',()=>{log.splice(+b.dataset.i,1);store.set('log',log);renderLog();}));
+}
+
+renderTrack(); renderLog(); loadNews();
+</script>
+</body>
+</html>
