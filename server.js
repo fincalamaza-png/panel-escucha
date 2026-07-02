@@ -17,7 +17,12 @@ import Parser from 'rss-parser';
 const app = express();
 app.use(express.json({ limit: '256kb' }));
 
-// --- CORS: permite que las apps de GitHub Pages hablen con este backend ---
+// --- Servir las dos apps (HTML) desde el propio backend ---
+app.get('/cerdos-y-rosas.html', (req, res) => res.sendFile('/app/cerdos-y-rosas.html'));
+app.get('/don-fadrique.html', (req, res) => res.sendFile('/app/don-fadrique.html'));
+app.get('/', (req, res) => res.sendFile('/app/cerdos-y-rosas.html'));
+
+// --- CORS: permite que las apps hablen con este backend ---
 // Pon en la variable de entorno ALLOWED_ORIGINS las URLs de tus apps,
 // separadas por comas. Si no la pones, se permite cualquier origen.
 const allowed = (process.env.ALLOWED_ORIGINS || '')
@@ -134,15 +139,15 @@ app.post('/api/refresh', async (req, res) => {
   res.json({ ok: true, updatedAt: cache.updatedAt });
 });
 
-// Intermediario de la API de Claude para generar comentarios
+// Intermediario de la API (Groq) para generar comentarios
 app.post('/api/generate', async (req, res) => {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return res.status(500).json({ error: 'Falta ANTHROPIC_API_KEY en el servidor.' });
+  const key = process.env.GROQ_API_KEY;
+  if (!key) return res.status(500).json({ error: 'Falta GROQ_API_KEY en el servidor.' });
 
   const { voiceBrief, who, post } = req.body || {};
   if (!post || !voiceBrief) return res.status(400).json({ error: 'Faltan datos (voiceBrief y post).' });
 
-  const model = process.env.MODEL || 'claude-sonnet-5';
+  const model = process.env.MODEL || 'llama-3.3-70b-versatile';
 
   const system = `Eres asesor de comunicación gastronómica. Redactas comentarios breves para redes sociales (Instagram/X) en español de España, en la voz indicada, para publicarlos en el post de OTRA cuenta.
 
@@ -160,24 +165,26 @@ Devuelve SOLO un array JSON válido, sin texto alrededor ni markdown, con exacta
   const user = `Post publicado por: ${who || '(no especificado)'}\n\nContenido del post:\n"""${post}"""\n\nGenera 3 propuestas de comentario en la voz indicada.`;
 
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
+    const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${key}`,
         'content-type': 'application/json'
       },
       body: JSON.stringify({
         model,
         max_tokens: 1000,
-        system,
-        messages: [{ role: 'user', content: user }]
+        temperature: 0.8,
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: user }
+        ]
       })
     });
     const data = await r.json();
     if (data.error) return res.status(502).json({ error: data.error.message || 'Error de la API' });
 
-    let text = (data.content || []).map(i => i.type === 'text' ? i.text : '').join('').trim();
+    let text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
     text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
     let arr;
     try { arr = JSON.parse(text); }
