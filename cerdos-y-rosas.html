@@ -90,6 +90,10 @@
   .news .nt{font-size:14px;font-weight:500;line-height:1.35;margin-bottom:6px}
   .news .nm{font-size:11px;color:var(--dehesa);display:flex;gap:8px}
   .news .use{margin-top:9px;font-size:12px;font-weight:600;color:var(--oxblood)}
+  .news-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+  .news-actions .lab{font-size:11px;color:var(--dehesa);width:100%;margin-bottom:2px}
+  .news-actions button{flex:1;min-width:70px;border:1px solid var(--line-strong);background:#fff;border-radius:8px;padding:7px 4px;font-family:'Inter';font-size:12px;font-weight:600;color:var(--oxblood);cursor:pointer}
+  .news-actions button.open{color:var(--dehesa);flex:0 0 auto;padding:7px 12px}
   .footnote{font-size:11px;color:var(--dehesa);text-align:center;margin-top:22px;line-height:1.5;padding:0 10px}
   .cfg{background:#FFF6E9;border:1px solid #E9D3A6;color:#7A5A18;border-radius:10px;padding:11px 12px;font-size:12.5px;line-height:1.5;margin-bottom:14px}
 </style>
@@ -185,7 +189,7 @@
    Ejemplo: const BACKEND_URL = "https://panel-backend.tudominio.com";
    Mientras esté vacío, la app funciona salvo Novedades y el generador.
    =================================================================== */
-const BACKEND_URL = "";
+const BACKEND_URL = "https://escucha.palaciocondealdana.com";
 const APP_KEY = "cr"; // esta app es Cerdos & Rosas
 /* =================================================================== */
 
@@ -276,14 +280,48 @@ async function loadNews(){
     const upd=data.updatedAt?new Date(data.updatedAt).toLocaleString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
     document.getElementById('newsUpd').textContent='Actualizado: '+upd;
     if(!data.items||!data.items.length){ newslist.innerHTML='<div class="empty">Sin noticias por ahora. Vuelve a intentarlo en un rato.</div>'; return; }
-    newslist.innerHTML=data.items.map(n=>{
+    const voces=Object.keys(voiceBrief);
+    newslist.innerHTML=data.items.map((n,idx)=>{
       const d=n.date?new Date(n.date).toLocaleDateString('es-ES',{day:'2-digit',month:'short'}):'';
-      return `<a class="news" href="${esc(n.link)}" target="_blank" rel="noopener">
+      const botones=voces.map(v=>`<button class="pick" data-idx="${idx}" data-voice="${esc(v)}">${esc(v)}</button>`).join('');
+      return `<div class="news">
         <div class="nt">${esc(n.title)}</div>
         <div class="nm"><span>${esc(n.source||'')}</span><span>${d}</span></div>
-        <div class="use">Abrir ↗</div></a>`;
+        <div class="news-actions">
+          <span class="lab">Comentar como:</span>
+          ${botones}
+          <button class="open" data-idx="${idx}">Abrir ↗</button>
+        </div></div>`;
     }).join('');
+    // guardamos los items para poder recuperarlos al pinchar
+    window._newsItems=data.items;
+    newslist.querySelectorAll('.pick').forEach(b=>b.addEventListener('click',()=>{
+      const n=window._newsItems[+b.dataset.idx];
+      commentFromNews(n, b.dataset.voice);
+    }));
+    newslist.querySelectorAll('.open').forEach(b=>b.addEventListener('click',()=>{
+      const n=window._newsItems[+b.dataset.idx];
+      if(n && n.link) window.open(n.link,'_blank');
+    }));
   }catch(e){ newslist.innerHTML='<div class="empty">No se pudieron cargar las noticias.</div>'; }
+}
+
+/* saltar de una noticia a Comentar con todo cargado y generar */
+function commentFromNews(n, chosenVoice){
+  // fijar la voz elegida
+  voice=chosenVoice;
+  document.querySelectorAll('.voice').forEach(x=>x.setAttribute('aria-pressed', x.dataset.voice===chosenVoice?'true':'false'));
+  // rellenar campos
+  document.getElementById('who').value = n.source ? ('Noticia de '+n.source) : 'Noticia de prensa';
+  document.getElementById('post').value = n.title;
+  // cambiar a la pestaña Comentar
+  document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
+  document.querySelector('nav.tabs button[data-tab="comentar"]').classList.add('active');
+  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-comentar').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  // generar propuestas directamente
+  generate();
 }
 
 /* seguimiento */
