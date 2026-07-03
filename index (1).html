@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Panel de Escucha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  :root{
+    --paper:#F2EDE3;--ink:#241C1A;--muted:#7A6A4F;
+    --ox:#6E1F2A;--rosa:#C0808A;--rosa-soft:#EBD8DB;
+    --bottle:#243B2E;--brass:#A67C34;--brass-soft:#EBDFC5;
+  }
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(120% 80% at 50% -10%, #FBF7F0 0%, var(--paper) 55%, #ECE4D5 100%);
+    color:var(--ink);font-family:'Inter',system-ui,sans-serif;
+    min-height:100dvh;display:flex;flex-direction:column;align-items:center;
+    padding:38px 22px 30px;max-width:480px;margin:0 auto;
+  }
+
+  /* Encabezado */
+  .top{text-align:center;margin-bottom:34px;animation:rise .6s ease}
+  .kicker{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  .title{font-family:'Fraunces',serif;font-weight:600;font-size:34px;line-height:1.05;letter-spacing:.2px}
+  .title .amp{color:var(--ox)}
+  .subtitle{font-size:13.5px;color:var(--muted);margin-top:12px;line-height:1.5;max-width:300px;margin-left:auto;margin-right:auto}
+  .rule{width:44px;height:2px;background:var(--brass);border-radius:2px;margin:20px auto 0;opacity:.7}
+
+  /* Tarjetas */
+  .cards{width:100%;display:flex;flex-direction:column;gap:16px;flex:1}
+  .card{
+    position:relative;display:block;text-decoration:none;color:inherit;overflow:hidden;
+    border-radius:20px;padding:24px 22px;border:1px solid rgba(0,0,0,.06);
+    background:#FBF7F0;box-shadow:0 6px 22px rgba(60,40,30,.06);
+    transition:transform .18s ease, box-shadow .18s ease;animation:rise .6s ease both;
+  }
+  .card:active{transform:scale(.985)}
+  .card:nth-child(1){animation-delay:.06s}
+  .card:nth-child(2){animation-delay:.14s}
+  .card .badge{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+  .card h2{font-family:'Fraunces',serif;font-weight:600;font-size:22px;line-height:1.1}
+  .card .desc{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.45}
+  .card .go{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-size:13px;font-weight:600}
+  .card .go .arrow{transition:transform .18s ease}
+  .card:hover .go .arrow{transform:translateX(3px)}
+  .card .accent{position:absolute;top:0;left:0;width:5px;height:100%}
+
+  /* Cerdos & Rosas */
+  .cr{background:linear-gradient(135deg,#FBF7F0 60%,var(--rosa-soft) 160%)}
+  .cr .accent{background:var(--ox)}
+  .cr .badge{background:var(--rosa-soft);color:var(--ox)}
+  .cr .badge span{font-family:'Fraunces',serif;font-weight:600;font-size:30px;line-height:1}
+  .cr h2{color:var(--ox)}
+  .cr .go{color:var(--ox)}
+
+  /* Don Fadrique */
+  .df{background:linear-gradient(135deg,#FBF8F1 60%,var(--brass-soft) 170%)}
+  .df .accent{background:var(--bottle)}
+  .df .badge{border:1.5px solid var(--brass);color:var(--bottle)}
+  .df .badge span{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:22px;line-height:1;letter-spacing:.5px}
+  .df h2{font-family:'Cormorant Garamond',serif;font-weight:700;color:var(--bottle);font-size:24px}
+  .df .go{color:var(--bottle)}
+
+  .foot{margin-top:26px;text-align:center;font-size:11px;color:var(--muted);line-height:1.6;animation:rise .6s ease both;animation-delay:.2s}
+  .foot .dot{display:inline-block;width:3px;height:3px;border-radius:50%;background:var(--muted);vertical-align:middle;margin:0 7px;opacity:.5}
+
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="kicker">Comunicación gastronómica</div>
+    <div class="title">Panel de <span class="amp">Escucha</span></div>
+    <div class="subtitle">Las noticias de vuestros temas y los comentarios, en un solo sitio.</div>
+    <div class="rule"></div>
+  </div>
+
+  <div class="cards">
+    <a class="card cr" href="cerdos-y-rosas.html">
+      <span class="accent"></span>
+      <div class="badge"><span>&amp;</span></div>
+      <h2>Cerdos &amp; Rosas</h2>
+      <div class="desc">Ibérico de bellota de Salamanca. Producto, oficio y dehesa.</div>
+      <div class="go">Entrar <span class="arrow">→</span></div>
+    </a>
+
+    <a class="card df" href="don-fadrique.html">
+      <span class="accent"></span>
+      <div class="badge"><span>DF</span></div>
+      <h2>Don Fadrique</h2>
+      <div class="desc">El restaurante. Cocina, sala y experiencia en mesa.</div>
+      <div class="go">Entrar <span class="arrow">→</span></div>
+    </a>
+  </div>
+
+  <div class="foot">
+    Rastreo de prensa automático<span class="dot"></span>Comentarios a tu criterio
+  </div>
+</body>
+</html>
